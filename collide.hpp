@@ -73,6 +73,7 @@ public:
     void multT(const mat_t &M1, const mat_t &M2) {
         M[0] = M2.multT(M1[0]); M[1] = M2.multT(M1[1]); M[2] = M2.multT(M1[2]);
     }
+    void assign(const mat_t &m) { *this = m; }
     const vec_t &operator[](int i) const { return M[i]; }
     vec_t &operator[](int i) { return M[i]; }
     vec_t multT(const vec_t &v) const { return vec_t(v.dot(M[0]), v.dot(M[1]), v.dot(M[2])); }
@@ -252,8 +253,8 @@ public:
 
 class obj_t {
     tlist_t m_trgs;    // Triangles.
-    obj_t *m_left;    // Left child.
-    obj_t *m_right;   // Right child.
+    obj_t  *m_left;    // Left child.
+    obj_t  *m_right;   // Right child.
     double  m_radius0; // Inner size.
     double  m_radius1; // Outer size.
     xform_t m_xform;   // Transformation to world.
@@ -331,7 +332,7 @@ public:
         if (m_right) m_right->build(orientBBox, all);
     }
     int append(const double *v1, const double *v2, const double *v3) {
-            const double *trg[] = {v1, v2, v3}; return append(trg);
+        const double *trg[] = {v1, v2, v3}; return append(trg);
     }
     int append(const float *const trg[3]) {
         double v1[] = {trg[0][0], trg[0][1], trg[0][2]};
@@ -372,7 +373,7 @@ class collide_t {
     mat_t   m_M21;
     xform_t m_X1, m_X21;
     callback_t *m_callback;
-    int m_collides, m_boxTests, m_trgTests;
+    int m_collides, m_Tests, m_boxTests, m_trgTests;
 
     bool xTrgPlane(vec_t *p, double *f, const trg_t &t, double d, const vec_t &n, const vec_t &v) {
         int x = 0;
@@ -447,7 +448,7 @@ class collide_t {
         if (m_eps.square(obb1->getRadius0() + m_s21 * obb2->getRadius0()) > d) return false;
         if (m_eps.square(obb1->getRadius1() + m_s21 * obb2->getRadius1()) < d) return true;
 
-        if (m_orient) obb1->orient(BB, m_M21, obb2); else *(mat_t *)&BB = m_M21;
+        if (m_orient) obb1->orient(BB, m_M21, obb2); else BB.assign(m_M21);
         double f11 = rabs(BB[0][0]), f12 = rabs(BB[0][1]), f13 = rabs(BB[0][2]);
         double f21 = rabs(BB[1][0]), f22 = rabs(BB[1][1]), f23 = rabs(BB[1][2]);
         double f31 = rabs(BB[2][0]), f32 = rabs(BB[2][1]), f33 = rabs(BB[2][2]);
@@ -482,6 +483,7 @@ class collide_t {
         return false;
     }
     void collide(obj_t *obb1, obj_t *obb2) {
+        m_Tests++;
         if (m_first && m_collides) return;
         obb1->build(m_orient); obb2->build(m_orient);
 
@@ -502,9 +504,10 @@ class collide_t {
     }
     void collide(const xform_t &x1, double s1, obj_t *obb1, const xform_t &x2, double s2, obj_t *obb2) {
         // Reset data.
-        m_collides = m_boxTests = m_trgTests = 0;
+        m_collides = m_Tests = m_boxTests = m_trgTests = 0;
         if (!obb1->size() || !obb2->size()) return;
 
+        dbg((stderr, "Collide Start ...\n"));
         obb1->build(m_orient); obb2->build(m_orient);
         m_eps.setWorld(s1, rmin(obb1->getRadius1(), obb2->getRadius1()));
 
@@ -516,6 +519,7 @@ class collide_t {
         m_X21.t = x1.multT(x2.t - x1.t) * (1/s1);
         m_M21 = m_X21; m_X21 *= m_s21;
         collide(obb1, obb2);
+        dbg((stderr, "Collide Stats: n=%d t=%d box=%d trg=%d\n", m_collides, m_Tests, m_boxTests, m_trgTests));
     }
 
 public:
@@ -547,7 +551,7 @@ public:
     }
     void setCallback(callback_t *callback) { m_callback = callback; }
     virtual int destroy() { delete this; return 0; }
-    collide_t() : m_orient(true) {}
+    collide_t(bool orient = true) : m_orient(orient) {}
     virtual ~collide_t() {}
 };
 
