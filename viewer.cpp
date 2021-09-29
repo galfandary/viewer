@@ -664,7 +664,7 @@ class torus_t : public model_t {
 public:
     torus_t(collide_t *collide, double Ra, double Rb, const char *name = 0) : model_t(collide, name) {
         getBox().setBox(0.0, 0.0, 0.0, Ra + Rb, Ra + Rb, Rb);
-        int Na = 120, Nb = 80, N = Na / 6;
+        int Na = 600, Nb = 400, N = Na / 6;
         double p2 = 6.283185307179586476925286766559012, Sa = p2 / Na, Sb = p2 / Nb, v0[2][3];
         float color[][4] = {{0.1f, 0.6f, 0.3f, 1.0f}, {0.0f, 0.2f, 0.5f, 0.6f}};
         for (int a = 0; a < Na; a++) {
@@ -935,7 +935,9 @@ class app_t : public gui_viewer_t {
         case 011: exit(0); break;
         case 033: exit(0); break;
         case 'q': exit(0); break;
-        default: messageBox(0, "key = %d = '%c'\n", key, key);
+        case XK_Delete: m_scene.deleteSelected(); postRepaint(); break;
+        case XK_BackSpace: m_scene.deleteSelected(); postRepaint(); break;
+        default: messageBox(0, "key = %x = '%c'\n", key, key);
         }
     }
     virtual void release(int mouse) {

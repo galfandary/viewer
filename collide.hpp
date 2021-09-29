@@ -1,8 +1,8 @@
-#define rabs  (double)fabs
-#define rsqrt (double)sqrt
-#define rsin  (double)sin
-#define rcos  (double)cos
-#define racos (double)acos
+#define rabs  fabs
+#define rsqrt sqrt
+#define rsin  sin
+#define rcos  cos
+#define racos acos
 
 const double EPS0((double)1E-6);
 
@@ -26,6 +26,8 @@ inline double rsq(double r) { return r * r; }
 #define MN_MX_ALL(f, g, t) MN2(f, t) MX2(g, t) MN3(f, t) MX3(g, t)
 
 MN_MX_ALL(rmin, rmax, double) const int _0 = 0;
+
+#define MIN_SPLIT_SIZE 100
 
 /*######################################################################*/
 
@@ -261,7 +263,7 @@ class obj_t {
     vec_t   m_dim;     // Dimension.
 
     void split(const vec_t &mean) {
-        if (size() < 4) return; // No split under this size.
+        if (size() < MIN_SPLIT_SIZE) return; // No split under this size.
 
         // Find axis of largest dimension.
         int a = 0; if (m_dim[1] > m_dim[a]) a = 1; if (m_dim[2] > m_dim[a]) a = 2;
@@ -276,7 +278,7 @@ class obj_t {
         for (trgs_t *t=m_trgs.getTrgs(), *tn; t; t=tn) {
             tn = t->next;
             double p = t->t[0].dot(m_xform[a]) + t->t[1].dot(m_xform[a]) + t->t[2].dot(m_xform[a]) - mp;
-            (p > eps || (p > -eps && m_left->size()) < m_right->size() ? m_left : m_right)->m_trgs.append(t);
+            (p > eps || (p > -eps && m_left->size() < m_right->size()) ? m_left : m_right)->m_trgs.append(t);
         }
 
         if (m_left->size() && m_right->size()) { m_trgs.clearTrgs(); return; }
