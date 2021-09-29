@@ -935,6 +935,8 @@ class app_t : public gui_viewer_t {
         case 011: exit(0); break;
         case 033: exit(0); break;
         case 'q': exit(0); break;
+        case XK_Tab: exit(0); break;
+        case XK_Escape: exit(0); break;
         case XK_Delete: m_scene.deleteSelected(); postRepaint(); break;
         case XK_BackSpace: m_scene.deleteSelected(); postRepaint(); break;
         default: messageBox(0, "key = %x = '%c'\n", key, key);
