@@ -408,7 +408,7 @@ public:
         return 0;
     }
     const char *file() const {
-        const char *opt = argc ? argv[argc - 1] : 0;
+        const char *opt = argc > 1 ? argv[argc - 1] : 0;
         return opt && *opt != '-' ? opt : 0;
     }
     void init(char **args) {
@@ -826,15 +826,15 @@ public:
             if (tree) return;
         } else if (cmd.find("-t")) {
             m_models.append(new torus_t(m_collide, 3.0, 1.0));
-        } else if (cmd.find("-2")) {
+        } else if (cmd.find("-p")) {
+            m_models.append(new pyramid_t(m_collide));
+            glDisable(GL_LIGHTING);
+        } else if (!cmd.find("-e")) {
             torus_t *t1 = new torus_t(m_collide, 2.0, 0.99, "Torus1");
             torus_t *t2 = new torus_t(m_collide, 2.0, 0.99, "Torus2");
             t2->getMatrix().rotate(90, 1, 0, 0);
             t2->getMatrix().translate(2, 0, 0);
             m_models.append(t1); m_models.append(t2);
-        } else {
-            m_models.append(new pyramid_t(m_collide));
-            glDisable(GL_LIGHTING);
         }
         for (int i = 0; i < m_models.size(); i++)
             new node_t(0, &m_tree, m_models[i]);
