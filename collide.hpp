@@ -266,7 +266,9 @@ class obj_t {
         if (size() < MIN_SPLIT_SIZE) return; // No split under this size.
 
         // Find axis of largest dimension.
-        int a = 0; if (m_dim[1] > m_dim[a]) a = 1; if (m_dim[2] > m_dim[a]) a = 2;
+        int a = 0;
+        if (m_dim[1] > m_dim[a]) a = 1;
+        if (m_dim[2] > m_dim[a]) a = 2;
 
         if (m_dim[a] == 0.0) return; // Impossible to split.
 
