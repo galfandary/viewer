@@ -914,27 +914,27 @@ class app_t : public gui_viewer_t {
     }
     virtual void press(int key, const gui_state_t &state) {
         switch (key) {
-        case 'H': showHelp(); break;
-        case 'i': showInfo(); break;
-        case 'r': resetView(); break;
         case '0': m_scene.setClearance(0); m_scene.setTolerance(1E-6); break;
         case '1': m_scene.setClearance(0.1); collide(); break;
         case '2': m_scene.setClearance(0.5); collide(); break;
         case '3': m_scene.setTolerance(1E-1); collide(); break;
         case '4': m_scene.setTolerance(1E-2); collide(); break;
         case '5': m_scene.setTolerance(1E-3); collide(); break;
+        case 'b': m_scene.toggle(scene_t::F_BBOX); postRepaint(); break;
         case 'c': collide(); break;
         case 'd': collide(10); break;
         case 'e': collide(100); break;
         case 'f': collide(1000); break;
+        case 'h': showHelp(); break;
+        case 'i': showInfo(); break;
         case 'l': m_scene.clearLines(); postRepaint(); break;
-        case 'b': m_scene.toggle(scene_t::F_BBOX); postRepaint(); break;
         case 'p': m_scene.toggle(scene_t::F_LINES); postRepaint(); break;
+        case 'q': exit(0); break;
+        case 'r': resetView(); break;
         case 's': m_scene.toggle(scene_t::F_SELECTED); postRepaint(); break;
         case 010: m_scene.deleteSelected(); postRepaint(); break;
         case 011: exit(0); break;
         case 033: exit(0); break;
-        case 'q': exit(0); break;
         case XK_Tab: exit(0); break;
         case XK_Escape: exit(0); break;
         case XK_Delete: m_scene.deleteSelected(); postRepaint(); break;
