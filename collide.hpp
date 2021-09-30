@@ -231,21 +231,38 @@ class tlist_t {
     int     m_size; // Number of triangles.
     trgs_t *m_root; // The triangle list root.
 
+    void link(trgs_t *t) {
+        t->next = m_root;
+        m_root = t;
+    }
+    void takeBack(tlist_t &x) {
+        auto t = x.getTrgs();
+        while (t) {
+            auto n = t->next;
+            link(t);
+            t = n;
+        }
+        x.clearTrgs();
+    }
 public:
     void addTrgs(vec_t &mean) {
         for (trgs_t *t=m_root; t; t=t->next)
             for (int j=0; j<3; j++) mean += t->t[j];
     }
-    void append(const double *const *trg) {
+    void append(const double *const *t) {
         append(new trgs_t);
-        m_root->t[0].init(trg[0]);
-        m_root->t[1].init(trg[1]);
-        m_root->t[2].init(trg[2]);
+        m_root->t[0].init(t[0]);
+        m_root->t[1].init(t[1]);
+        m_root->t[2].init(t[2]);
+    }
+    void takeBack(tlist_t &l, tlist_t &r) {
+        takeBack(l);
+        takeBack(r);
     }
     void clearTrgs() { m_root = 0; }
     int size() const { return m_size; }
     trgs_t *getTrgs() { return m_root; }
-    void append(trgs_t *t) { t->next = m_root; m_root = t; m_size++; }
+    void append(trgs_t *t) { link(t); m_size++; }
     const trgs_t *getTrgs() const { return m_root; }
     tlist_t() : m_size(0), m_root(0) {}
     ~tlist_t() { for (trgs_t *t=m_root, *tn; t; t=tn) { tn=t->next; delete t; } }
@@ -283,11 +300,14 @@ class obj_t {
             (p > eps || (p > -eps && m_left->size() < m_right->size()) ? m_left : m_right)->m_trgs.append(t);
         }
 
-        if (m_left->size() && m_right->size()) { m_trgs.clearTrgs(); return; }
+        auto M = size() / 5;
+        m_trgs.clearTrgs();
+        if (m_left->size() > M && m_right->size() > M) return;
 
         // Abort the split if either l or r are empty.
         dbg((stderr, "Split failed: axis = %d, n = %d, l->n = %d,  r->n = %d\n",
              a, size(), m_left->size(), m_right->size()));
+        m_trgs.takeBack(m_left->m_trgs, m_right->m_trgs);
         delete m_left; delete m_right; m_left = m_right = 0;
     }
     void refit() {
