@@ -566,6 +566,7 @@ public:
     }
     const char *getName() const { return m_name; }
     bool isTransparent() const { return m_transparent; }
+    int nodes() const { return m_obj ? m_obj->nodes() : 0; }
     int getTrg() const { return m_obj ? m_obj->size() : 0; }
     void setTransparent() { m_transparent = true; }
     void build(collide_t *collide) { collide->build(m_obj); }
@@ -581,6 +582,7 @@ public:
 struct models_t : pointers_t<model_t> {
     void drawBox() const { for (int i = 0; i < size(); i++) at(i)->drawBox(); }
     void getBox(box_t &box) const { box.reset(); for (int i = 0; i < size(); i++) at(i)->inflate(box); }
+    int nodes() const { int n = 0; for (int i = 0; i < size(); i++) n += at(i)->nodes(); return n; }
     int getTrg() const { int n = 0; for (int i = 0; i < size(); i++) n += at(i)->getTrg(); return n; }
     void draw(bool box) const {
         for (int i = 0; i < size(); i++) if (!at(i)->isTransparent()) at(i)->draw(box);
@@ -841,6 +843,7 @@ public:
     }
     int getTrg() const { return n_trg; }
     int size() const { return m_models.size(); }
+    int nodes() const { return m_models.nodes(); }
     void reset() { m_tree.reset(); }
     void clearLines() { m_lines.clear(); }
     void setTrg() { n_trg = m_models.getTrg(); }
@@ -896,8 +899,9 @@ class app_t : public gui_viewer_t {
     void showInfo() {
         messageBox("Information",
                    "Number of objects: %d\n"
+                   "Number of nodes: %d\n"
                    "Number of triangles: %d\n",
-                   m_scene.size(), m_scene.getTrg());
+                   m_scene.size(), m_scene.nodes(), m_scene.getTrg());
     }
     void resetView() {
         m_scene.reset();

@@ -367,6 +367,11 @@ public:
     int append(const float *v1, const float *v2, const float *v3) {
         const float *trg[] = {v1, v2, v3}; return append(trg);
     }
+    int nodes() const {
+        auto l = m_left ? m_left->nodes() : 0;
+        auto r = m_right ? m_right->nodes() : 0;
+        return l + r + 1;
+    }
     obj_t *getLeft() { return m_left; }
     obj_t *getRight() { return m_right; }
     double getRadius0() const { return m_radius0; }
